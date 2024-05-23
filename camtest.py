@@ -4,7 +4,9 @@ import pygame
 import numpy as np
 import time
 import math
+from angleCalculator import angleCalculator
 from RingBuffer import RingBuffer
+
 
 start_time = time.time()  # Get the current time
 condition_met = False  # Initialize the condition flag
@@ -20,78 +22,7 @@ mp_pose = mp.solutions.pose
 
 pygame.init()
 cap = cv2.VideoCapture(0)
-
-bufferSize = 5
-
-angleBuffer = RingBuffer(bufferSize)
-leftHsBuffer = RingBuffer(bufferSize)
-rightHsBuffer = RingBuffer(bufferSize)
-
-def knee_angle():
-    x1 = lm_arr[24].x
-    y1 = lm_arr[24].y
-    x2 = lm_arr[26].x
-    y2 = lm_arr[26].y
-    x3 = lm_arr[27].x
-    y3 = lm_arr[27].y
-    # Calculate the vectors
-    A = (x2 - x1, y2 - y1)
-    B = (x2 - x3, y2 - y3)
-
-    # Calculate the dot product
-    dot_product = A[0] * B[0] + A[1] * B[1]
-
-    # Calculate the magnitudes
-    magnitude_A = math.sqrt(A[0] ** 2 + A[1] ** 2)
-    magnitude_B = math.sqrt(B[0] ** 2 + B[1] ** 2)
-
-    # Calculate the angle in radians
-    theta = math.acos(dot_product / (magnitude_A * magnitude_B))
-
-    # Convert the angle to degrees
-    angle_degrees = theta * 180 / math.pi
-
-    return angle_degrees
-
-def chest_angle():
-    x1 = lm_arr[12].x
-    y1 = lm_arr[12].y
-    x2 = lm_arr[24].x
-    y2 = lm_arr[24].y
-    x3 = lm_arr[26].x
-    y3 = lm_arr[26].y
-    # Calculate the vectors
-    A = (x2 - x1, y2 - y1)
-    B = (x2 - x3, y2 - y3)
-
-    # Calculate the dot product
-    dot_product = A[0] * B[0] + A[1] * B[1]
-
-    # Calculate the magnitudes
-    magnitude_A = math.sqrt(A[0] ** 2 + A[1] ** 2)
-    magnitude_B = math.sqrt(B[0] ** 2 + B[1] ** 2)
-
-    # Calculate the angle in radians
-    theta = math.acos(dot_product / (magnitude_A * magnitude_B))
-
-    # Convert the angle to degrees
-    angle_degrees = theta * 180 / math.pi
-
-    return angle_degrees
-
-def absolute_chest_angle():
-    # calculate chest angle relative to screen only
-
-    left_shoulder = np.array([lm_arr[11].x, lm_arr[11].y])
-    right_shoulder = np.array([lm_arr[12].x, lm_arr[12].y])
-    left_hip = np.array([lm_arr[23].x, lm_arr[23].y])
-    right_hip = np.array([lm_arr[24].x, lm_arr[24].y])
-
-    # calculate left body angle
-    left_hs = (left_shoulder - left_hip)
-    right_hs = (right_shoulder - right_hip)
-
-    return (np.arctan2(left_hs[0], left_hs[1]) + np.arctan2(right_hs[0], right_hs[1]) / 2), left_hs, right_hs
+angle_calculator = angleCalculator()
 
 with mp_pose.Pose(
     min_detection_confidence=0.5,
@@ -124,7 +55,7 @@ with mp_pose.Pose(
     if lm is not None:
         lm_arr = lm.landmark
 
-        temp_angle, temp_left_hs, temp_right_hs = absolute_chest_angle()
+        temp_angle, temp_left_hs, temp_right_hs = angle_calculator.get_angle(lm_arr, "screen_space_chest")
 
         angleBuffer.add(temp_angle)
         leftHsBuffer.add(temp_left_hs)
