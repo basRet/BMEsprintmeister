@@ -57,6 +57,7 @@ with mp_pose.Pose(
 
         temp_angle, temp_left_hs, temp_right_hs = angle_calculator.get_angle(lm_arr, "screen_space_chest")
 
+        # TODO Fix or just remove this
         angleBuffer.add(temp_angle)
         leftHsBuffer.add(temp_left_hs)
         rightHsBuffer.add(temp_right_hs)
@@ -66,7 +67,6 @@ with mp_pose.Pose(
         right_hs = np.mean(rightHsBuffer.get(), axis=0)
 
         # draw the vector
-        # angle = 20
         height, width, _ = image.shape
         zero_vector = (int(width/2), int(height/2)) # vector that points to middle of screen to draw other vectors
         print(angle)
