@@ -135,12 +135,17 @@ with mp_pose.Pose(
         right_hs = np.mean(rightHsBuffer.get(), axis=0)
 
         # draw the vector
-        angle = 20
+        # angle = 20
         height, width, _ = image.shape
-        zero_vector = (int(width/2), int(height/2))
-        draw_vector_coords = (zero_vector[0] - int(200 * math.sin(angle)), zero_vector[1] - int(200*math.cos(angle)))
-        image = cv2.line(image, zero_vector, (int(width/2) + int(left_hs[0]*200), int(height/2) + int(left_hs[1]*200)), (255, 0, 0), 10)
+        zero_vector = (int(width/2), int(height/2)) # vector that points to middle of screen to draw other vectors
+        print(angle)
+        draw_vector_coords = (zero_vector[0] - int(200 * math.cos(angle)), zero_vector[1] - int(200*math.sin(angle)))
         image = cv2.line(image, zero_vector, draw_vector_coords, (0, 255, 0), 5)
+
+        #straight up plotting the coordinates found from the program, no angle calulcation
+        image = cv2.line(image, zero_vector, (int(width/2) - int(left_hs[0]*200), int(height/2) - int(left_hs[1]*200)), (255, 0, 0), 10)
+
+        #this line is a horizontal plane on the screen
         image = cv2.line(image, (zero_vector[0] + 100, zero_vector[1]), (int(width/2)-100, int(height/2)), (0, 0, 255), 5)
         cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
 
